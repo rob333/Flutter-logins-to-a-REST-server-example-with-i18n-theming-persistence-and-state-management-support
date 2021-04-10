@@ -1,10 +1,13 @@
 {
+
     "app": {
+        "hello": "Hello",
+        "thanks": "thanks",
         "~": ""
     },
 
     "login": {
-        "title" : "Board",
+        "title" : "Persistence Demo",
         "login" : "Login",
         "rememberMe" : "Remember me",
         "forgotPassword" : "Forgot Password",

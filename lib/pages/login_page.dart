@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mediator_persistence/mediator.dart';
 
 import '/api/api_login.dart';
 import '/var.dart';
@@ -14,7 +15,8 @@ class _LoginPageState extends State<LoginPage> {
   bool isApiCallProcess = false;
 
   /// Persistence variable
-  late bool rememberMe;
+  final rememberMe = true.globalPersist('rememberMe');
+  final rememberedAccount = ''.globalPersist('account');
 
   final FocusNode accountFocusNode = FocusNode();
   final FocusNode passwordFocusNode = FocusNode();
@@ -39,15 +41,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget body(BuildContext context) {
-    rememberMe = prefs.getBool('rememberMe') ?? true;
     if (!isApiCallProcess) {
       late FocusNode focus;
-      if (rememberMe) {
-        final rememberedAccount = prefs.getString('account');
-        if (rememberedAccount == null || rememberedAccount.isEmpty) {
+      if (rememberMe.value) {
+        if (rememberedAccount.value.isEmpty) {
           focus = accountFocusNode;
         } else {
-          accountFieldController.text = rememberedAccount;
+          accountFieldController.text = rememberedAccount.value;
           focus = passwordFocusNode;
         }
       } else {
@@ -95,11 +95,11 @@ class _LoginPageState extends State<LoginPage> {
                     Row(
                       children: [
                         GestureDetector(
-                          onTap: () => tapRememberMe(!rememberMe),
+                          onTap: () => tapRememberMe(!rememberMe.value),
                           child: Row(
                             children: [
                               Checkbox(
-                                value: rememberMe,
+                                value: rememberMe.value,
                                 onChanged: tapRememberMe,
                               ),
                               'login.rememberMe'.ci18n(context),
@@ -151,17 +151,15 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> tapRememberMe(bool? value) async {
+  void tapRememberMe(bool? value) {
     setState(() {
-      rememberMe = value!;
+      rememberMe.value = value!;
+
+      // Clear the remembered account if un-checked.
+      if (value == false) {
+        rememberedAccount.remove();
+      }
     });
-
-    // Clear the remembered account if un-checked.
-    if (value == false) {
-      prefs.remove('account');
-    }
-
-    await prefs.setBool('rememberMe', rememberMe);
   }
 
   TextFormField buildAccountFormField(BuildContext context) {
@@ -279,8 +277,8 @@ class _LoginPageState extends State<LoginPage> {
     if (validateAndSaveLoginForm()) {
       print('login: ${loginRequest.toJson()}');
 
-      if (rememberMe) {
-        await prefs.setString('account', loginRequest.account!);
+      if (rememberMe.value) {
+        rememberedAccount.store(loginRequest.account!);
       }
 
       setState(() {

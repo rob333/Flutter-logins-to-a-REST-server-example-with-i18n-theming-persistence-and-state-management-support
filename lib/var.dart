@@ -1,31 +1,33 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
-import 'package:flutter_mediator_lite/mediator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_mediator_persistence/mediator.dart';
 
 //* Login token from the REST server.
 var loginToken = '';
 
-//* Declare a global scope SharedPreferences.
-late SharedPreferences prefs;
-
-//* Step1B: Declare the persistent watched variable with `late Rx<Type>`
-late Rx<String> locale;
 const DefaultLocale = 'en';
+//* Declare the persistent watched variable with `defaultVal.globalPersist('key')`
+///    int: 0.globalPersist('intKey');
+/// double: 0.0.globalPersist('doubleKey');
+/// String: ''.globalPersist('StringKey');
+///   bool: false.globalPersist('boolKey');
+final locale = DefaultLocale.globalPersist('locale');
+final themeIdx = 1.globalPersist('themeIdx');
 
-//* Step1B: Declare the persistent watched variable with `late Rx<Type>`
-late Rx<int> themeIdx;
-const DefaultThemeIdx = 1;
+//* Declare the watched variable with `globalWatch(initialValue)`.
+final touchCount = globalWatch(0, tag: 'tagCount'); // main.dart
+final data = globalWatch(<ListItem>[]); // list_page.dart
 
-/// initialize the persistent watched variables
-/// whose value is stored by SharedPreferences.
-Future<void>? initVars() async {
-  // To make sure SharedPreferences works.
-  WidgetsFlutterBinding.ensureInitialized();
+class ListItem {
+  const ListItem(
+    this.item,
+    this.units,
+    this.color,
+  );
 
-  prefs = await SharedPreferences.getInstance();
-  locale = globalWatch(prefs.getString('locale') ?? DefaultLocale);
-  themeIdx = globalWatch(prefs.getInt('themeIdx') ?? DefaultThemeIdx);
+  final String item;
+  final int units;
+  final Color color;
 }
 
 /// Change the locale, by `String`[countryCode]
@@ -34,20 +36,23 @@ Future<void> changeLocale(BuildContext context, String countryCode) async {
   final loc = Locale(countryCode);
   await FlutterI18n.refresh(context, loc);
   //* Step4: Make an update to the watched variable.
+  //* The persistent watched variable will update the persistent value automatically.
   locale.value = countryCode;
-
-  await prefs.setString('locale', countryCode);
 }
 
 /// Change the theme, by ThememData `int` [idx]
 /// and store the setting with SharedPreferences.
-Future<void> changeTheme(int idx) async {
+void changeTheme(int idx) {
   idx = idx.clamp(0, 1);
   if (idx != themeIdx.value) {
     themeIdx.value = idx;
-
-    await prefs.setInt('themeIdx', idx);
   }
+}
+
+/// Sign out from the REST server and clear the [loginToken].
+void onSignOut(BuildContext context) {
+  loginToken = '';
+  Navigator.of(context).pushReplacementNamed('/');
 }
 
 extension StringI18n on String {

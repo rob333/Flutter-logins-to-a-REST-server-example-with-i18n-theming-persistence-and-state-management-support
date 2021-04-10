@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter_i18n/loaders/decoders/json_decode_strategy.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_mediator_lite/mediator.dart';
+import 'package:flutter_mediator_persistence/mediator.dart';
 
 import 'route.dart';
 import 'theme.dart';
 import 'var.dart';
 
 Future<void> main() async {
-  //* Step1: initialize the persistent watched variables
-  //* whose value is stored by SharedPreferences.
-  await initVars();
+  //* Step1: Initial the persistent store.
+  await initGlobalPersist();
 
   runApp(
     //* Step2: Create the host with `globalHost`
