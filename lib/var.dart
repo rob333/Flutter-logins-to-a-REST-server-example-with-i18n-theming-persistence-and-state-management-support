@@ -37,7 +37,7 @@ Future<void> changeLocale(BuildContext context, String countryCode) async {
     await FlutterI18n.refresh(context, loc);
     //* Step4: Make an update to the watched variable.
     //* The persistent watched variable will update the persistent value automatically.
-    locale.value = countryCode; // will rebuild the registered widget
+    locale.value = countryCode; // will rebuild the registered consume widget
   }
 }
 
@@ -45,7 +45,7 @@ Future<void> changeLocale(BuildContext context, String countryCode) async {
 void changeTheme(int idx) {
   idx = idx.clamp(0, 1);
   if (idx != themeIdx.value) {
-    themeIdx.value = idx; // will rebuild the registered widget
+    themeIdx.value = idx; // will rebuild the registered consume widget
   }
 }
 
@@ -62,7 +62,7 @@ extension StringI18n on String {
   }
 
   /// String extension for i18n and `locale.consume` the widget
-  /// to register the widget for the state management.
+  /// to create consume widget for the state management.
   Widget ci18n(BuildContext context, {TextStyle? style}) {
     return locale.consume(
       () => Text(FlutterI18n.translate(context, this), style: style),

@@ -21,7 +21,7 @@ A Flutter boilerplate example which logins to a REST server with i18n, theming, 
 ```yaml
 dependencies:
   flutter_i18n: ^0.22.3
-  flutter_mediator_persistence: ^1.0.0
+  flutter_mediator_persistence: ^1.0.1
   http:
 
   # ...
@@ -76,7 +76,7 @@ final themeIdx = 1.globalPersist('themeIdx');
 
 ### Step 2. Prepare the `themeData` in [theme.dart][]
 
-### Step 3. Register the widget in [main.dart][]
+### Step 3. Create consume widget in [main.dart][]
 
 ```dart
 class MyApp extends StatelessWidget {
@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
     //* to register the watched variable to the host to rebuild it when updating.
     //* `watchedVar.consume()` is a helper function to
     //* `touch()` itself first and then `globalConsume`.
-    return themeIdx.consume( // register the widget
+    return themeIdx.consume( // create consume widget
       () => MaterialApp(
         // ...
         theme: themeData(themeIdx.value), // set the themeData
@@ -99,7 +99,7 @@ class MyApp extends StatelessWidget {
 void changeTheme(int idx) {
   idx = idx.clamp(0, 1);
   if (idx != themeIdx.value) {
-    themeIdx.value = idx; // will rebuild the registered widget automatically
+    themeIdx.value = idx; // will rebuild the registered consume widget
   }
 }
 ```
@@ -126,7 +126,7 @@ extension StringI18n on String {
   }
 
   /// String extension for i18n and `locale.consume` the widget
-  /// to register the widget for the state management.
+  /// to create consume widget for the state management.
   Widget ci18n(BuildContext context, {TextStyle? style}) {
     return locale.consume(
       () => Text(FlutterI18n.translate(context, this), style: style),
@@ -137,7 +137,7 @@ extension StringI18n on String {
 
 ### Step 2. Prepare the locale files in [assets/flutter_i18n/][]
 
-### Step 3. Register the widget that needs to do i18n (in [lib/pages/locale_page.dart][]).
+### Step 3. Create consume widget that needs to do i18n (in [lib/pages/locale_page.dart][]).
 
 ```dart
 locale.consume(() => Text('${'app.hello'.i18n(context)} ')),
@@ -162,7 +162,7 @@ Future<void> changeLocale(BuildContext context, String countryCode) async {
     await FlutterI18n.refresh(context, loc);
     //* Step4: Make an update to the watched variable.
     //* The persistent watched variable will update the persistent value automatically.
-    locale.value = countryCode; // will rebuild the registered widget
+    locale.value = countryCode; // will rebuild the registered consume widget
   }
 }
 ```
@@ -198,7 +198,7 @@ class _ScrollPageState extends State<ScrollPage> {
   }
 ```
 
-### Step 3. Register the widget
+### Step 3. Create consume widget
 
 ```dart
 class CustomAppBar extends StatelessWidget {
@@ -207,14 +207,12 @@ class CustomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //* Step3: Create a widget with `globalConsume` or `watchedVar.consume`
-    //* to register the watched variable to the host to rebuild it when updating.
+    //* Step3: Create a consume widget with
+    //* `globalConsume` or `watchedVar.consume` to register the
+    //* watched variable to the host to rebuild it when updating.
     return globalConsume(
       () => Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: 10.0,
-          horizontal: 24.0,
-        ),
+        // ...
         color: Colors.black
             .withOpacity((scrollOffset.value / 350).clamp(0, 1).toDouble()),
         child: header,
